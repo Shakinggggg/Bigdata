@@ -12,40 +12,71 @@ font_path = "C:/Windows/Fonts/msyh.ttc"
 weights = [0.22, 0.06, 0.08, 0.08, 0.08, 0.11, 0.09, 0.12, 0.16]
 
 
-def salary_month_process(ori_data, max_s, min_s):
-    return (ori_data['salary2'] - min_s) / (max_s - min_s)
+def generate_data(ori_data):
+    return
 
 
-def loc_process(ori_data, loc_dict, max_num, min_num):
-    return (loc_dict[ori_data['岗位地区']] - min_num) / (max_num - min_num)
+def salary_month_process(ori_data, max_s, min_s, is_nor):
+    if is_nor:
+        return (ori_data['salary2'] - min_s) / (max_s - min_s)
+    else:
+        return ori_data['salary2']
 
 
-def welfare_process(ori_data, max_num, min_num):
-    return (ori_data['福利数量'] - min_num) / (max_num - min_num)
+def loc_process(ori_data, loc_dict, max_num, min_num, is_nor):
+    if is_nor:
+        return (loc_dict[ori_data['岗位地区']] - min_num) / (max_num - min_num)
+    else:
+        return loc_dict[ori_data['岗位地区']]
 
 
-def sal_process(ori_data, max_num, min_num):
-    return (ori_data['salary1'] - min_num) / (max_num - min_num)
+def welfare_process(ori_data, max_num, min_num, is_nor):
+    if is_nor:
+        return (ori_data['福利数量'] - min_num) / (max_num - min_num)
+    else:
+        return ori_data['福利数量']
 
 
-def edu_process(ori_data, edu_dict, max_num, min_num):
-    return (edu_dict[ori_data['学历要求']] - min_num) / (max_num - min_num)
+def sal_process(ori_data, max_num, min_num, is_nor):
+    if is_nor:
+        return (ori_data['salary1'] - min_num) / (max_num - min_num)
+    else:
+        return ori_data['salary1']
 
 
-def exp_process(ori_data, exp_dict, max_num, min_num):
-    return (exp_dict[ori_data['工作经验要求']] - min_num) / (max_num - min_num)
+def edu_process(ori_data, edu_dict, max_num, min_num, is_nor):
+    if is_nor:
+        return (edu_dict[ori_data['学历要求']] - min_num) / (max_num - min_num)
+    else:
+        return edu_dict[ori_data['学历要求']]
 
 
-def skill_process(ori_data, max_num, min_num):
-    return (ori_data['需求技能数量'] - min_num) / (max_num - min_num)
+def exp_process(ori_data, exp_dict, max_num, min_num, is_nor):
+    if is_nor:
+        return (exp_dict[ori_data['工作经验要求']] - min_num) / (max_num - min_num)
+    else:
+        return exp_dict[ori_data['工作经验要求']]
 
 
-def rongzi_process(ori_data, rongzi_dict, max_num, min_num):
-    return (rongzi_dict[ori_data['融资情况']] - min_num) / (max_num - min_num)
+def skill_process(ori_data, max_num, min_num, is_nor):
+    if is_nor:
+        return (ori_data['需求技能数量'] - min_num) / (max_num - min_num)
+    else:
+        return ori_data['需求技能数量']
 
 
-def size_process(ori_data, size_dict, max_num, min_num):
-    return (size_dict[ori_data['公司人数']] - min_num) / (max_num - min_num)
+def rongzi_process(ori_data, rongzi_dict, max_num, min_num, is_nor):
+    if is_nor:
+        return (rongzi_dict[ori_data['融资情况']] - min_num) / (max_num - min_num)
+    else:
+        return rongzi_dict[ori_data['融资情况']]
+
+
+def size_process(ori_data, size_dict, max_num, min_num, is_nor):
+    if is_nor:
+        return (size_dict[ori_data['公司人数']] - min_num) / (max_num - min_num)
+    else:
+        return size_dict[ori_data['公司人数']]
 
 
 def cal_score(ori_data):
@@ -79,46 +110,50 @@ def graph_pie(ori_data):
 
 
 def calculate(ori_data):
+    nor = 1
     sava_df = copy.deepcopy(ori_data)
     df = ori_data
     max_salary_month, min_salary_month = max(list(df['salary2'])), min(list(df['salary2']))
-    df['salary2'] = df.apply(lambda r: salary_month_process(r, max_salary_month, min_salary_month), axis=1)
+    df['salary2'] = df.apply(lambda r: salary_month_process(r, max_salary_month, min_salary_month, nor), axis=1)
 
     loc_dict = df['岗位地区'].value_counts().to_dict()
     max_loc, min_loc = max(list(df['岗位地区'].value_counts())), min(list(df['岗位地区'].value_counts()))
-    df['岗位地区'] = df.apply(lambda r: loc_process(r, loc_dict, max_loc, min_loc), axis=1)
+    df['岗位地区'] = df.apply(lambda r: loc_process(r, loc_dict, max_loc, min_loc, nor), axis=1)
 
     max_wel, min_wel = max(list(df['福利数量'])), min(list(df['福利数量']))
-    df['福利数量'] = df.apply(lambda r: welfare_process(r, max_wel, min_wel), axis=1)
+    df['福利数量'] = df.apply(lambda r: welfare_process(r, max_wel, min_wel, nor), axis=1)
 
     max_sal, min_sal = max(list(df['salary1'])), min(list(df['salary1']))
-    df['salary1'] = df.apply(lambda r: sal_process(r, max_sal, min_sal), axis=1)
+    df['salary1'] = df.apply(lambda r: sal_process(r, max_sal, min_sal, nor), axis=1)
 
     edu_dict = {'学历不限': 8, '初中及以下': 7, '中专/中技': 6, '高中': 5, '大专': 4, '本科': 3, '硕士': 2, '博士': 1}
-    df['学历要求'] = df.apply(lambda r: edu_process(r, edu_dict, 8, 1), axis=1)
+    df['学历要求'] = df.apply(lambda r: edu_process(r, edu_dict, 8, 1, nor), axis=1)
 
     exp_dict = {'经验不限': 10, '在校/应届': 9, '应届生': 9, '1年以内': 8, '1-3年': 7, '3-5年': 6, '5-10年': 5, '10年以上': 4}
-    df['工作经验要求'] = df.apply(lambda r: exp_process(r, exp_dict, 10, 4), axis=1)
+    df['工作经验要求'] = df.apply(lambda r: exp_process(r, exp_dict, 10, 4, nor), axis=1)
 
     max_skill, min_skill = max(list(df['需求技能数量'])), min(list(df['需求技能数量']))
-    df['需求技能数量'] = df.apply(lambda r: skill_process(r, max_skill, min_skill), axis=1)
+    df['需求技能数量'] = df.apply(lambda r: skill_process(r, max_skill, min_skill, nor), axis=1)
 
     rongzi_dict = {'已上市': 10, 'D轮及以上': 9, 'C轮': 8, 'B轮': 7, 'A轮': 6, '天使轮': 5, '未融资': 4, '未知': 4, '不需要融资': 4}
-    df['融资情况'] = df.apply(lambda r: rongzi_process(r, rongzi_dict, 10, 4), axis=1)
+    df['融资情况'] = df.apply(lambda r: rongzi_process(r, rongzi_dict, 10, 4, nor), axis=1)
 
     size_dict = {'10000人以上': 10, '1000-9999人': 9, '500-999人': 8, '100-499人': 7, '20-99人': 6, '0-20人': 5, '未知': 4}
-    df['公司人数'] = df.apply(lambda r: size_process(r, size_dict, 10, 4), axis=1)
+    df['公司人数'] = df.apply(lambda r: size_process(r, size_dict, 10, 4, nor), axis=1)
 
     df.drop(columns=df.columns[0], axis=1, inplace=True)
     df['score'] = df.apply(lambda r: cal_score(r), axis=1)
     df_max_score, df_min_score = max(list(df['score'])), min(list(df['score']))
     df['score'] = df.apply(lambda r: score_normalize(r, df_max_score, df_min_score), axis=1)
-    # print(df)
+
+    return df
+
     # df.to_csv('test_score.csv')
-    sava_df['score'] = df.apply(lambda r: cal_score(r), axis=1)
-    max_score, min_score = max(list(sava_df['score'])), min(list(sava_df['score']))
-    sava_df['score'] = sava_df.apply(lambda r: score_normalize(r, max_score, min_score), axis=1)
-    sava_df.drop(columns=df.columns[0], axis=1, inplace=True)
+    # sava_df['score'] = df.apply(lambda r: cal_score(r), axis=1)
+    # max_score, min_score = max(list(sava_df['score'])), min(list(sava_df['score']))
+    # sava_df['score'] = sava_df.apply(lambda r: score_normalize(r, max_score, min_score), axis=1)
+    # sava_df.drop(columns=df.columns[0], axis=1, inplace=True)
+
     # 饼图
     # graph_pie(sava_df)
     # print(sava_df)
@@ -150,3 +185,5 @@ def calculate(ori_data):
 if __name__ == '__main__':
     data = load_data('dealed_data3.csv')
     calculate(data)
+
+    data_to_predict = 1
