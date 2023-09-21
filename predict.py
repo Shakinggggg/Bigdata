@@ -2,10 +2,9 @@ from calculate import *
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
-
+from sklearn.model_selection import train_test_split
 
 matplotlib.rcParams['font.family'] = 'sans-serif'
 matplotlib.rcParams['font.sans-serif'] = ['DejaVu Sans']  # 使用DejaVu Sans或其他可用字体
@@ -36,6 +35,8 @@ def generate_data(ori_data):
 
 
 def train(x, y, num_epoch, learn_rate, batch_size, hidden_size, output_size, hidden_size2):
+    X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
+    print(X_train)
     input_size = x.shape[1]
     model = MultiLayerPerceptron(input_size, hidden_size, output_size, hidden_size2)
     criterion = nn.MSELoss()
@@ -44,9 +45,9 @@ def train(x, y, num_epoch, learn_rate, batch_size, hidden_size, output_size, hid
     losses = []
     for epoch in range(num_epoch):
         total_loss = 0
-        for i in range(0, X.shape[0], batch_size):
-            batch_X = torch.FloatTensor(X[i:i + batch_size])
-            batch_y = torch.FloatTensor(y[i:i + batch_size])
+        for i in range(0, X_train.shape[0], batch_size):
+            batch_X = torch.FloatTensor(X_train[i:i + batch_size])
+            batch_y = torch.FloatTensor(y_train[i:i + batch_size])
 
             # 前向传播
             outputs = model(batch_X)
@@ -60,15 +61,20 @@ def train(x, y, num_epoch, learn_rate, batch_size, hidden_size, output_size, hid
             total_loss += loss.item()
 
         # 记录每个epoch的损失
-        losses.append(total_loss / (X.shape[0] // batch_size))
-        print(f'Epoch [{epoch + 1}/{num_epoch}], Loss: {total_loss / (X.shape[0] // batch_size)}')
+        losses.append(total_loss / (X_train.shape[0] // batch_size))
+        print(f'Epoch [{epoch + 1}/{num_epoch}], Loss: {total_loss / (X_train.shape[0] // batch_size)}')
+
+        # 测试集上的误差
+        # test_outputs = model(torch.FloatTensor(X_test))
+        # test_loss = criterion(test_outputs, torch.FloatTensor(y_test))
+        # print(f'Epoch [{epoch + 1}/{num_epoch}], Loss: {total_loss / (X_train.shape[0] // batch_size)}, Test Loss: {test_loss.item()}')
 
     # 打印最终模型的权重和偏置
     # print("Final model's state_dict:")
     # for param_tensor in model.state_dict():
     #     print(param_tensor, "\t", model.state_dict()[param_tensor])
 
-    torch.save(model.state_dict(), 'model_params.pth')
+    torch.save(model.state_dict(), 'model_params2.pth')
     plt.plot(losses)
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
@@ -114,23 +120,26 @@ def normalize(pre_data):
 
 def predict(input_size, output_size, hidden_size, hidden_size2, input_x):
     predict_model = MultiLayerPerceptron(input_size, hidden_size, output_size, hidden_size2)
-    predict_model.load_state_dict(torch.load('model_params.pth'))
+    predict_model.load_state_dict(torch.load('model_params1.pth'))
     predict_model.eval()
 
     data = input_x
     data, max_sal, min_sal = normalize(data)
     data_tensor = torch.FloatTensor(data)
     prediction = predict_model(data_tensor)
-    prediction = prediction * (max_sal - min_sal) + min_sal
+    print(prediction)
+    # prediction = prediction * (max_sal - min_sal) + min_sal
     return float(prediction)
 
 
 if __name__ == '__main__':
     data = load_data('dealed_data3.csv')
     numerical_data = calculate(data)
+    # print(numerical_data['salary2'])
     X, Y = generate_data(numerical_data)
-    epoch, learn_rate, batch_size, hidden_size, out_size, hidden_size2 = 100, 0.0008, 32, 64, 1, 32
+    epoch, learn_rate, batch_size, hidden_size, out_size, hidden_size2 = 2000, 0.01, 32, 64, 1, 32
     # train(X, Y, epoch, learn_rate, batch_size, hidden_size, out_size, hidden_size2)
-    test_X = ['上海', 5, '本科', '经验不限', 3, '不需要融资', '20-99人']
+    # ['岗位地区', '福利数量', '学历要求', '工作经验要求', '需求技能数量', '融资情况', '公司人数']
+    test_X = ['南昌', 20, '博士', '10年以上', 5, '已上市', '10000人以上']
     print(predict(X.shape[1], out_size, hidden_size, hidden_size2, test_X))
 

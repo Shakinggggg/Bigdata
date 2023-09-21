@@ -110,11 +110,11 @@ def graph_pie(ori_data):
 
 
 def calculate(ori_data):
-    nor = 1
+    nor = 0
     sava_df = copy.deepcopy(ori_data)
     df = ori_data
     max_salary_month, min_salary_month = max(list(df['salary2'])), min(list(df['salary2']))
-    df['salary2'] = df.apply(lambda r: salary_month_process(r, max_salary_month, min_salary_month, nor), axis=1)
+    df['salary2'] = df.apply(lambda r: salary_month_process(r, max_salary_month, min_salary_month, 0), axis=1)
 
     loc_dict = df['岗位地区'].value_counts().to_dict()
     max_loc, min_loc = max(list(df['岗位地区'].value_counts())), min(list(df['岗位地区'].value_counts()))
@@ -126,7 +126,7 @@ def calculate(ori_data):
     max_sal, min_sal = max(list(df['salary1'])), min(list(df['salary1']))
     df['salary1'] = df.apply(lambda r: sal_process(r, max_sal, min_sal, nor), axis=1)
 
-    edu_dict = {'学历不限': 8, '初中及以下': 7, '中专/中技': 6, '高中': 5, '大专': 4, '本科': 3, '硕士': 2, '博士': 1}
+    edu_dict = {'学历不限': 1, '初中及以下': 2, '中专/中技': 3, '高中': 4, '大专': 5, '本科': 6, '硕士': 7, '博士': 8}
     df['学历要求'] = df.apply(lambda r: edu_process(r, edu_dict, 8, 1, nor), axis=1)
 
     exp_dict = {'经验不限': 10, '在校/应届': 9, '应届生': 9, '1年以内': 8, '1-3年': 7, '3-5年': 6, '5-10年': 5, '10年以上': 4}
